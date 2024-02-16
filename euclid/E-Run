@@ -1,0 +1,273 @@
+
+====================== ST_DataModelTools ==========================
+
+# Check the validity of a XML file ref. the data model
+ERun ST_DataModelTools CheckXML -p product.xml [-v ${DATAMODEL_VERSION}]
+
+# This tool analyzes types and namespaces links inside datamodel. It
+# proposes a json output and a neo4j ingestion to visualize graph (a
+# database must be available). The user can also add procedures of his own
+# choice to handle the database.
+ERun ST_DataModelTools ST_DM_Analyzer {path_to_schema} --json {json_output_dir}
+
+
+# Provides help to developers to build FITS filenames according to the
+# naming rules. As its own name indicates this tool is a filename generator, 
+# but it can also be used as filename checker.
+ERun ST_DataModelTools ST_DM_FilenameProvider --dataproduct_name TESTELEMENTS --instance_id INSTANCE --release 01.20 --pf SHE
+
+# - —dataproduct_name - DataProduct naming including as examples:
+#   - Instrument (VIS/NIR/SIR) 
+#   - OBSERVATIONID
+#   - EXPOSURE
+#   - SPECTRALBAND
+#   - SPECTRAL-RANGE
+#   - DATA-TYPE
+#   - SUBTYPE
+# - —instance_id - Instance Id embedding specific parameters of the data
+#                  product such as /Spatial localization/ProcessingParameters
+# - —release - the release number which must be like XX.XX of this regular
+#              expression: ^[0-9]{2}.[0-9]{2}$
+# - —pf - the name of the Processing Function (SHE, MER, NIR…)
+
+# This module aims to get a specific Mission DataBase Parameter from a XML
+# file. It returns in the logs the value of the attribute for every
+# parameters in the XML file
+ERun ST_DataModelTools ST_DM_MDBTools -x <file/path> -p <list> <of> <parameters> -a <list> <of> <attributes>
+
+# - -x, –xml_path  - The path to the XML file input
+# - -p, –parameter - The list of parameters to get from the XML
+#                   file
+# - -a, –attribute - The list of attributes to get from the XML
+#                   file corresponding to the parameter
+
+
+====================== ST_ArchiveUtils ==========================
+# Setup:
+alias archive-cli="ERun ST_Operations ST_ArchiveClient"
+
+# Configure credentials:
+archive-cli config set user name <username>
+archive-cli config set user password <password>
+
+# Retrieve files:
+archive-cli config set eas project <project>
+archive-cli config set eas environment <env>
+archive-cli config set dss sdc <sdc-name>
+
+# Download a data product and its attached data files
+archive-cli --with-files eas get --type <paramers> --id <one> <or> <multiple> <product> <ids> [ --files-include '.*PSF.*' ]
+
+# Retrieve a single file from the DSS
+archive-cli dss get <filename>
+
+# Upload a file or directory to the EAS
+archive-cli --with-files [ --data-dir <path/to/data> ] [ --skip-duplicates ] eas store <path/to/file/or/directory>
+
+# Upload a file or directory to the DSS
+archive-cli dss store <path/to/file/or/directory>
+
+# Check data files availability
+archive-cli tools check --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Update the ManualValidationStatus header attribute.
+archive-cli eas validate --type <paramers> --id <one> <or> <multiple> <product> <ids> 
+archive-cli eas invalidate --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Update the +PRIVILEGES context attribute.
+archive-cli eas publish --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Update the ToBePublished header attribute.
+archive-cli eas mark-sas-internal --type <paramers> --id <one> <or> <multiple> <product> <ids>
+archive-cli eas mark-sas-public --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Mark data products metadata for deletion.
+archive-cli eas delete --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Cancel deletion.
+archive-cli eas cancel-deletion --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Confirm deletion.
+archive-cli eas confirm-deletion --type <paramers> --id <one> <or> <multiple> <product> <ids>
+
+# Clone a PPO workdir
+archive-cli tools clone <ppo-id>
+
+# Find tile indices whose EXT cutouts are missing
+archive-cli tools find-missing-cutouts <file_of_tiles_to_check.txt> > <output_tiles_without_cutouts.txt>
+
+
+
+====================== ST_PipelineUtils ==========================
+
+ERun ST_Operations ST_CloneAndRunPPOs --ppos <ppo_ids> --plans <plan_ids> [--sdcs <sdcs>] [--suffix <suffix>] [--fixed-dsr] [--ingest] [--no-valid] [--max-ingest <max_ingest>] --output-dir <OUTPUT_DIR>
+# - <ppo_ids> is the space-separated list of: original PPO IDs, local PPO xmls,
+#             files containing lists of PPO IDs and/or PPO xmls;
+# - <plan_ids> is the space-separated list of original plan IDs.
+# - <sdcs> is a space-separated list of target SDCs, or a space-separated list 
+#          of target SDCs with others to avoid cloning to the SDC of the original 
+#          PPO even if it is in the list, or same to keep the input PPO SDC, or
+#          all to generate one PPO per SDC, test to generate one PPO per Test SDC,
+#          prod to generate one PPO per Production SDC, or others (default) to 
+#          generate one PPO per SDC of the same group (Test or Production) which 
+#          is not that of the input PPO;
+# - <suffix> is the suffix to be appended to relevant nodes (see detailed description).
+# - --fixed-dsr not append the provided suffix to the DataSetRelease field.
+# - --ingest to ingest clones into configured EAS
+# - --no-valid to not valid local XMLs against DataModel
+# - <max_ingest> maximum number of clones to ingest before a confirmation was asked to user
+# - <OUTPUT_DIR> is folder where PPOs are retrieved and cloned (must not exist, script will create it)
+
+ERun ST_Operations ST_ComputeProcessingBudget <profiling_file>
+
+# Query the statuses of the given Plans:
+ERun ST_Operations ST_QueryStatus <plan_ids> --plans <plan_status_output>
+
+# Query the statuses of the given Plans and associated PPOs
+ERun ST_Operations ST_QueryStatus <plan_ids> --plans <plan_status_output> --ppos <ppo_status_output>
+
+# Query the statuses of the given PPOs
+ERun ST_Operations ST_QueryStatus <ppo_ids> --ppos <ppo_status_output>
+
+# Step 1: Render Plans
+ERun ST_Operations ST_RenderAndRunPlans <context> --plan-dir <plan_dir>
+# - <context> is the path to the said configuration file
+# - <plan_dir> is the path to the rendered Plans directory
+
+# Steps 2 & 3: Ingest Plan and create PPOs
+ERun ST_Operations ST_RenderAndRunPlans --plan-dir <plan_dir> --ingest
+
+# Step 4 (optional): Retrieve the PPOs
+ERun ST_Operations ST_RenderAndRunPlans --plan-dir <plan_dir> --ppo-dir <ppo_dir>
+
+# Step 5: Allocate Plans and PPOs
+ERun ST_Operations ST_RenderAndRunPlans --plan-dir <plan_dir> --allocate
+
+# End-to-end runs
+# 1. From Plan rendering to PPO triggering:
+ERun ST_Operations ST_RenderAndRunPlans <context> --plan-dir <plan_dir> --ingest --allocate
+#2. From Plan rendering to PPO retrieval (no triggering):
+ERun ST_Operations ST_RenderAndRunPlans <context> --plan-dir <plan_dir> --ingest --ppo-dir <ppo_dir>
+
+# Extract the plan identifiers in a text file
+ERun ST_Operations ST_RenderAndRunPlans <context> --plan-dir <plan_dir> --plan-ids <plan_ids>
+
+# Infra Configuration
+ERun ST_Operations ST_ReportInfraConfig --help
+# usage: ST_ReportInfraConfig [-h]
+#                             [--username USERNAME] [--password PASSWORD]
+#                             [--project {EUCLID,TEST}]
+#                             [--env {ops,test}]
+#                             [--params {CONFIG_SDCSPECIFIC CVMFS_SERVER ...}]
+#                             [--report-format {redmine,stdout}]
+# 
+# Monitor infra configuration of Euclid SDCs
+# 
+# optional arguments:
+# 
+# --username USERNAME               EAS username
+# --password PASSWORD               EAS password
+# --project {EUCLID or TEST}        EAS project
+# --env {ops or test}               EAS environment
+# --params {CONFIG_SDCSPECIFIC CVMFS_SERVER ...}     additional parameter names, extends default names
+# --report-format {redmine,stdout}  Report output format, defaults to 'redmine'
+
+
+# The purpose of this utility is to compare the resources needed to run a PF and defined in the 
+# package definition (PackageDef) with the available resources in the SDCs defined with the pilots.
+ERun ST_Operations ST_ComparePkgDefWithPilots --help
+# usage: ST_ComparePkgDefWithPilots [-h]
+#                             [--username USERNAME] [--password PASSWORD]
+#                             [--project {EUCLID,TEST}]
+#                             [--env {ops,test}]
+#                             [--pkg PACKAGE_DEF_FILE]
+# 
+# Compare package definition resources to infra pilots
+# 
+# optional arguments:
+# -h, --help            show this help message and exit
+# 
+# Authentication:
+# --username USERNAME   EAS username
+# --password PASSWORD   EAS password
+# 
+# EAS-DPS configuration:
+# --project {EUCLID,TEST}   EAS project
+# --env {ops,test}          EAS environment
+# 
+# Input configuration:
+# --pkg PACKAGE_DEF_FILE    Path to the package definition file
+
+# The purpose of this utility is to get an overview of the production status.
+# It takes as input a set of processing plans, and outputs statistics about the 
+# processing orders whose parent plan belongs to this set.
+ERun ST_Operations ST_ReportProductionStatus --help
+# usage: ST_ReportProductionStatus [-h]
+#                                 [--username USERNAME] [--password PASSWORD]
+#                                 [--project {ALL,DMTEST,EUCLID,INFRATEST,TEST}]
+#                                 [--env {dev,integration,ops,test}]
+#                                 [--sdc {SDC-XX,...}]
+#                                 [--include-sdc INCLUDE_SDC [INCLUDE_SDC ...]]
+#                                 [--include-sdc-prod]
+#                                 [--datetime-start-after DATETIME_START_AFTER]
+#                                 [--datetime-end-before DATETIME_END_BEFORE]
+#                                 [--output OUTPUT]
+#                                 [--report-format {csv,html,txt,none} [{csv,html,txt,none} ...]]
+#                                 [--img-format {png,svg} [{png,svg} ...]]
+#                                 [--with-plots]
+#                                 [--commit]
+#                                 plans [plans ...]
+# 
+# Monitor Euclid SGS production status
+# 
+# Optional arguments:
+# -h, --help            show this help message and exit
+# 
+# Authentification:
+# --username USERNAME   EAS username
+# --password PASSWORD   EAS password
+# 
+# EAS-DPS configuration:
+# --project {ALL,DMTEST,EUCLID,INFRATEST,TEST}
+#                         EAS project
+# --env {dev,integration,ops,test}
+#                         EAS environment
+# 
+# EAS-DSS configuration:
+# --sdc {SDC-XX,...}
+#                         SDC used to store and retrieve files
+# 
+# Input configuration:
+# plans                 processing plan identifiers or local files containing them
+# --include-sdc INCLUDE_SDC [INCLUDE_SDC ...]
+#                         list of SDC to include in the report, defaults to all
+# --include-sdc-prod    include production SDCs in the report
+# --datetime-start-after DATETIME_START_AFTER
+#                         only consider PPOs whose start date is after this date
+# --datetime-end-before DATETIME_END_BEFORE
+#                         only consider PPOs whose end date is before this date
+# 
+# Output configuration:
+# --output OUTPUT       directory where output files are written to
+# --report-format {csv,html,txt,none} [{csv,html,txt,none} ...]
+#                         report output format, defaults to html
+# --img-format {png,svg} [{png,svg} ...]
+#                         images output format, defaults to svg
+# --with-plots, --no-plots
+#                         create statistics plots, defaults to true
+# --commit              store generated report in the EAS
+
+# The purpose of this utility is to group self calibration pointings in a 
+# pattern similar to the Reference Observation Sequence (ROS).
+# These groups can then be used as context values for the plan renderer.
+ERun ST_Operations ST_GenerateSelfcalGroups --help
+# usage: ST_GenerateSelfcalGroups [--port PORT] [--attr ATTR] [--template TEMPLATE] [--kv [KV ...]] [--output OUTPUT]
+# 
+# Generate plan renderer context values for grouping PV-001 dithers as ROS-like observations
+# 
+# optional arguments:
+# --port PORT           name of the plan port to render, defaults to 'raw_frame'
+# --attr ATTR           attribute path to the commanded pointing, defaults to 'Data.CommandedFPAPointing'
+# --template TEMPLATE   name of template variable to render, defaults to 'ROS_like_selection'
+# --kv [KV ...]         additional context key-value parameters
+# --output OUTPUT       output context file, defaults to standard output
