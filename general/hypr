@@ -1,0 +1,57 @@
+# █▄▀ █▀▀ █▄█ █▄▄ █ █▄░█ █▀▄ █ █▄░█ █▀▀ █▀
+# █░█ ██▄ ░█░ █▄█ █ █░▀█ █▄▀ █ █░▀█ █▄█ ▄█
+
+# Session actions
+SUPER + Q              # kill window
+ALT + F4               # kill window
+SUPER + del            # kill hyperland
+SUPER + L              # lock computer
+SUPER + BACKSPACE      # logout
+Home                   # powermenu
+SUPER + SHIFT + R      # reload hyprland
+
+# Window actions
+SUPER + W              # toggle floating window
+SUPER + G              # toggle focused window to floating window
+ALT + RETURN           # fullscreen
+
+# App actions
+CTRL + ESC             # toggle waybar
+SUPER + T              # open kitty [T]erminal
+SUPER + E              # open fil[E] manager
+SUPER + C              # open Neovim [C]ode editor
+SUPER + F              # open chromium browser
+SUPER + O              # open [O]bsidian
+SUPER + n              # open calculator
+CTRL + SHIFT + ESC     # open btop
+
+# Rofi toggles
+SUPER + A              # open application drawer
+SUPER + TAB            # open active applications picker
+
+# Screenshot
+SUPER + P              # drag to snip an area
+SUPER + CTRL + P       # frozen screen drag to snip
+SUPER + ALT + P        # print focused monitor
+PRINT                  # print all monitor outputs
+
+# Exec custom scripts
+SUPER + ALT + RIGHT    # next wallpaper
+SUPER + ALT + LEFT     # previous wallpaper
+SUPER + ALT + UP       # next waybar mode
+SUPER + ALT + DOWN     # previous waybar mode
+SUPER + SHIFT + T      # theme select menu
+SUPER + SHIFT + A      # rofi style select menu
+SUPER + SHIFT + W      # rofi wall select menu
+
+# Workspaces
+SUPER + [0-9]          # workspace [0-9]
+SUPER + SHIFT + [0-9]  # move window to workspoace [0-9]
+SUPER + ALT + [0-9]    # silently move window to workspoace [0-9]
+
+# Special workspaces
+SUPER + ALT + S        # silently move window to scratchpad
+SUPER + S              # Toggle scratchpad
+
+# Toggle Layout
+SUPER + J              # Toggle split (horizontal vs vertical)
